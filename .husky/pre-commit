@@ -1,0 +1,13 @@
+#!/bin/sh
+# Ensure Node is available in Git Bash
+if [ -x "/c/Program Files/nodejs/node.exe" ]; then
+  PATH="/c/Program Files/nodejs:$PATH"
+fi
+
+cd clario || exit 1
+
+echo "Lint-staged..."
+./node_modules/.bin/lint-staged --allow-empty || exit 1
+
+echo "Typecheck..."
+./node_modules/.bin/tsc --noEmit || exit 1

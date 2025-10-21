@@ -1,0 +1,8 @@
+#!/bin/sh
+# Ensure Node is available in Git Bash
+if [ -x "/c/Program Files/nodejs/node.exe" ]; then
+  PATH="/c/Program Files/nodejs:$PATH"
+fi
+
+echo "? commitlint running..."
+./clario/node_modules/.bin/commitlint --config clario/commitlint.config.cjs --edit "$1"
