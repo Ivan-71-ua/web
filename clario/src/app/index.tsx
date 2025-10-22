@@ -1,9 +1,9 @@
-﻿import { PropsWithChildren } from "react";
-import { AppRoutes } from "./routes";
+﻿import { PropsWithChildren } from 'react'
+import { AppRoutes } from './routes'
 
 function Providers({ children }: PropsWithChildren) {
   // додаватимеш контексти тут (Redux/Query/Theme і т.д.)
-  return children;
+  return children
 }
 
 export default function App() {
@@ -11,5 +11,5 @@ export default function App() {
     <Providers>
       <AppRoutes />
     </Providers>
-  );
+  )
 }
