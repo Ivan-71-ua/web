@@ -1,0 +1,8 @@
+.shell {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.main {
+  padding: 24px 0 64px;
+}
