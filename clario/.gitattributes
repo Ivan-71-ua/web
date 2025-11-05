@@ -1,10 +1,6 @@
-# Normalize line endings — prefer LF in repository and working tree where appropriate
-# This avoids warnings about LF/CRLF and keeps consistent EOL across platforms.
 
-# Treat all files as text by default when possible
 * text=auto
 
-# Force LF for common source files so they stay consistent in the repo and on CI
 *.js     text eol=lf
 *.jsx    text eol=lf
 *.ts     text eol=lf
@@ -18,5 +14,4 @@
 *.yaml   text eol=lf
 *.sh     text eol=lf
 
-# Keep Windows-specific scripts with CRLF
 *.cmd    text eol=crlf

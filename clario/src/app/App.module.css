@@ -1,0 +1,17 @@
+.shell {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.main {
+  padding: 24px 0 64px;
+}
+html,
+body {
+  overflow-x: hidden;
+}
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
