@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import css from './Register.module.css'
 
 export default function Register() {
@@ -24,9 +25,9 @@ export default function Register() {
         <div className={css.right}>
           <div className={css.haveAcc}>
             Вже маєте акаунт?
-            <a className={css.linkBtn} href="/login">
+            <Link className={css.linkBtn} to="/login">
               Увійти
-            </a>
+            </Link>
           </div>
 
           <button className={css.social}>Зареєструватись з Google</button>

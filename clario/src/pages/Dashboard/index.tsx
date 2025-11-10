@@ -1,4 +1,6 @@
-﻿import css from './Dashboard.module.css'
+﻿// src/pages/Dashboard/index.tsx
+import { Link } from 'react-router-dom'
+import css from './Dashboard.module.css'
 
 export default function Dashboard() {
   return (
@@ -8,10 +10,10 @@ export default function Dashboard() {
           <img src="/logo.png" alt="" />
         </div>
         <h1 className={css.pageTitle}>Добрий день, User</h1>
-        <a href="/profile" className={css.profile}>
+        <Link to="/profile" className={css.profile}>
           Профіль
           <span className={css.dot} />
-        </a>
+        </Link>
       </header>
 
       <div className={css.grid}>
@@ -39,9 +41,9 @@ export default function Dashboard() {
               <span className={css.rowVal}>$12000</span>
             </div>
           </div>
-          <a className={css.btn} href="/balance">
+          <Link className={css.btn} to="/balance">
             Перейти
-          </a>
+          </Link>
         </div>
 
         <div className={css.cardLg}>
@@ -64,9 +66,9 @@ export default function Dashboard() {
               <b className={css.tVal}>+ $16000</b>
             </li>
           </ul>
-          <a className={css.btn} href="/transactions">
+          <Link className={css.btn} to="/balance">
             Перейти
-          </a>
+          </Link>
         </div>
 
         <div className={css.card}>
@@ -87,9 +89,9 @@ export default function Dashboard() {
             </div>
             <span className={css.pct}>50%</span>
           </div>
-          <a className={css.btn} href="/goals">
+          <Link className={css.btn} to="/goals">
             Перейти
-          </a>
+          </Link>
         </div>
 
         <div className={css.card}>
@@ -98,9 +100,9 @@ export default function Dashboard() {
             <span className={css.achIcon} />
             <span className={css.achText}>Виконана перша ціль</span>
           </div>
-          <a className={css.btn} href="/goals">
+          <Link className={css.btn} to="/goals">
             Перейти
-          </a>
+          </Link>
         </div>
 
         <div className={css.card}>
@@ -111,9 +113,9 @@ export default function Dashboard() {
               просто і зрозуміло.
             </div>
           </div>
-          <a className={css.btn} href="/assistant">
+          <Link className={css.btn} to="/assistant">
             Перейти
-          </a>
+          </Link>
         </div>
 
         <div className={css.cardWide}>
@@ -123,9 +125,9 @@ export default function Dashboard() {
             або підтримати проєкт донатом.
           </p>
           <div className={css.actions}>
-            <a className={css.btn} href="/support">
+            <Link className={css.btn} to="/support">
               Повідомити про баг
-            </a>
+            </Link>
             <button className={css.btnGreen}>Підтримати нас</button>
           </div>
         </div>

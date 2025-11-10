@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import css from './Login.module.css'
 
 export default function Login() {
@@ -18,9 +19,9 @@ export default function Login() {
         <div className={css.right}>
           <div className={css.haveAcc}>
             Немає акаунта?
-            <a className={css.linkBtn} href="/auth">
+            <Link className={css.linkBtn} to="/auth">
               Зареєструватись
-            </a>
+            </Link>
           </div>
 
           <button className={css.social}>Увійти з Google</button>
@@ -35,15 +36,19 @@ export default function Login() {
           <form className={css.form}>
             <input className={css.input} placeholder="Електронна пошта" />
             <input className={css.input} type="password" placeholder="Пароль" />
+
             <div className={css.extras}>
-              <label className={css.check}>
-                <input type="checkbox" className={css.checkbox} />
-                <span>Запам’ятати мене</span>
+              <label className={css.remember}>
+                <input type="checkbox" className={css.rememberInput} />
+                <span className={css.rememberBox} aria-hidden />
+                <span className={css.rememberText}>Запамʼятати мене</span>
               </label>
-              <a href="" className={css.forgot}>
+
+              <Link to="/reset" className={css.forgot}>
                 Забули пароль?
-              </a>
+              </Link>
             </div>
+
             <button className={css.submit}>Увійти</button>
           </form>
         </div>
