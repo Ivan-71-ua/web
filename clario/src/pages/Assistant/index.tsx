@@ -1,4 +1,5 @@
-﻿import css from './Assistant.module.css'
+﻿import { Link } from 'react-router-dom'
+import css from './Assistant.module.css'
 
 export default function Assistant() {
   return (
@@ -8,10 +9,15 @@ export default function Assistant() {
           <img src="/logo.png" alt="" />
         </div>
         <h1 className={css.title}>Clario AI Помічник</h1>
-        <a href="" className={css.profile}>
-          Профіль
-          <span className={css.dot} />
-        </a>
+        <div className={css.actions}>
+          <Link to="/" className={css.primaryBtn}>
+            На головну
+          </Link>
+          <Link to="/profile" className={css.profile}>
+            Профіль
+            <span className={css.dot} />
+          </Link>
+        </div>
       </header>
 
       <div className={css.chat}>
@@ -27,6 +33,9 @@ export default function Assistant() {
 
         <div className={css.inputRow}>
           <input className={css.input} placeholder="Введіть текст" />
+          <button type="button" className={css.sendBtn}>
+            Надіслати
+          </button>
         </div>
       </div>
     </section>
