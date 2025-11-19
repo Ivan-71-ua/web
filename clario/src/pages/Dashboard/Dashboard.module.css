@@ -337,7 +337,6 @@
   font-weight: 800;
 }
 
-/* якщо десь давала .supportCard — хай поводиться як звичайна */
 .supportCard {
   grid-column: auto;
 }

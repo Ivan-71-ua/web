@@ -1,4 +1,3 @@
-/* src/pages/BalanceAndTransactions/BalanceAndTransactions.module.css */
 .wrap {
   padding: 24px 16px 72px;
 }
@@ -113,6 +112,8 @@
   font-family: Manrope, sans-serif;
   font-weight: 800;
   color: #3f4352;
+  margin-bottom: 0;
+  padding-bottom: 0%;
 }
 
 .metaRight {

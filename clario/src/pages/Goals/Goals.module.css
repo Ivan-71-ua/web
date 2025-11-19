@@ -299,3 +299,95 @@
   color: #6f7277;
   font-size: 14px;
 }
+
+.goalRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.goalInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 160px;
+}
+
+.goalInfo > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.goalAmounts {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.barWrap {
+  flex: 1;
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.pct {
+  min-width: 56px;
+  text-align: right;
+  font-weight: 600;
+}
+.dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+}
+.red {
+  background-color: #ef4444;
+}
+
+.green {
+  background-color: #22c55e;
+}
+
+.blue {
+  background-color: #3b82f6;
+}
+
+.purple {
+  background-color: #a855f7;
+}
+
+.orange {
+  background-color: #f97316;
+}
+.barRed {
+  height: 100%;
+  background-color: #ef4444;
+  border-radius: 9999px;
+}
+
+.barGreen {
+  height: 100%;
+  background-color: #22c55e;
+  border-radius: 9999px;
+}
+
+.barBlue {
+  height: 100%;
+  background-color: #3b82f6;
+  border-radius: 9999px;
+}
+
+.barPurple {
+  height: 100%;
+  background-color: #a855f7;
+  border-radius: 9999px;
+}
+
+.barOrange {
+  height: 100%;
+  background-color: #f97316;
+  border-radius: 9999px;
+}

@@ -1,7 +1,36 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../../shared/context/AuthContext'
 import css from './Login.module.css'
 
 export default function Login() {
+  const navigate = useNavigate()
+  const { login, loading, error } = useAuth()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setFormError(null)
+
+    if (!email.trim() || !password.trim()) {
+      setFormError('Заповніть, будь ласка, всі поля')
+      return
+    }
+
+    try {
+      await login(email.trim(), password.trim())
+      navigate('/dashboard')
+    } catch {
+      return
+    }
+  }
+
+  const finalError = formError || error
+
   return (
     <section className={css.wrap}>
       <div className={css.container}>
@@ -33,9 +62,21 @@ export default function Login() {
             <span className={css.line}></span>
           </div>
 
-          <form className={css.form}>
-            <input className={css.input} placeholder="Електронна пошта" />
-            <input className={css.input} type="password" placeholder="Пароль" />
+          <form className={css.form} onSubmit={handleSubmit}>
+            <input
+              className={css.input}
+              placeholder="Електронна пошта"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              className={css.input}
+              type="password"
+              placeholder="Пароль"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
             <div className={css.extras}>
               <label className={css.remember}>
@@ -49,7 +90,11 @@ export default function Login() {
               </Link>
             </div>
 
-            <button className={css.submit}>Увійти</button>
+            {finalError && <div className={css.error}>{finalError}</div>}
+
+            <button className={css.submit} type="submit" disabled={loading}>
+              {loading ? 'Вхід...' : 'Увійти'}
+            </button>
           </form>
         </div>
       </div>
