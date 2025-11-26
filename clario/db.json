@@ -1,0 +1,147 @@
+{
+  "users": [
+    {
+      "firstName": "Ivan",
+      "lastName": "Symochko",
+      "phone": "+380777777777",
+      "email": "is@gmail.com",
+      "password": "parol1",
+      "id": 1
+    },
+    {
+      "firstName": "вася",
+      "lastName": "cупер",
+      "phone": "+380987654321",
+      "email": "bb@gmail.com",
+      "password": "parol1",
+      "id": 2
+    },
+    {
+      "firstName": "Bodya",
+      "lastName": "Pavuk",
+      "phone": "+380666666666",
+      "email": "bodya.pavuk@gmail.com",
+      "password": "parol1",
+      "id": 3
+    }
+  ],
+  "transactions": [
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Їжа",
+      "amount": 25,
+      "date": "19.11.2025",
+      "description": "Сосиски",
+      "id": 1
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Житло",
+      "amount": 1000,
+      "date": "18.11.2025",
+      "description": "Хата",
+      "id": 2
+    },
+    {
+      "userId": 1,
+      "type": "income",
+      "category": "Дохід",
+      "amount": 500,
+      "date": "19.11.2025",
+      "description": "Подарунок",
+      "id": 3
+    },
+    {
+      "userId": 1,
+      "type": "income",
+      "category": "Дохід",
+      "amount": 10000,
+      "date": "12.11.2025",
+      "description": "Зарплата",
+      "id": 4
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Розваги",
+      "amount": 2500,
+      "date": "13.11.2025",
+      "description": "казино",
+      "id": 5
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Транспорт",
+      "amount": 50,
+      "date": "12.11.2025",
+      "description": "Маршрутка",
+      "id": 6
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Їжа",
+      "amount": 300,
+      "date": "14.11.2025",
+      "description": "устриці",
+      "id": 7
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Транспорт",
+      "amount": 5000,
+      "date": "15.11.2025",
+      "description": "жигуль",
+      "id": 8
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Їжа",
+      "amount": 40,
+      "date": "17.11.2025",
+      "description": "Булочка",
+      "id": 9
+    },
+    {
+      "userId": 1,
+      "type": "income",
+      "category": "Дохід",
+      "amount": 100,
+      "date": "17.11.2025",
+      "description": "кешбек",
+      "id": 10
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Житло",
+      "amount": 150,
+      "date": "16.11.2025",
+      "description": "готель",
+      "id": 11
+    },
+    {
+      "userId": 1,
+      "type": "income",
+      "category": "Дохід",
+      "amount": 5000,
+      "date": "13.11.2025",
+      "description": "Просто",
+      "id": 12
+    },
+    {
+      "userId": 1,
+      "type": "expense",
+      "category": "Житло",
+      "amount": 2000,
+      "date": "20.11.2025",
+      "description": "готель",
+      "id": 13
+    }
+  ]
+}

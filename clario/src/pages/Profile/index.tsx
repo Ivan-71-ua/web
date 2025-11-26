@@ -1,7 +1,34 @@
-import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../shared/context/AuthContext'
 import css from './Profile.module.css'
 
 export default function Profile() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const initials = useMemo(() => {
+    if (!user) return 'U'
+    if (user.firstName && user.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    }
+    if (user.firstName) return user.firstName[0].toUpperCase()
+    if (user.email) return user.email[0].toUpperCase()
+    return 'U'
+  }, [user])
+
+  const firstName = user?.firstName ?? ''
+  const lastName = user?.lastName ?? ''
+  const phone = user?.phone ?? ''
+  const email = user?.email ?? ''
+
+  const fullName = (firstName || lastName ? `${firstName} ${lastName}`.trim() : '') || 'User Name'
+
+  function handleLogout() {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <section className={css.wrap}>
       <header className={css.top}>
@@ -16,9 +43,9 @@ export default function Profile() {
 
       <div className={css.grid}>
         <div className={css.avatarCard}>
-          <div className={css.avatarBig}>U</div>
-          <p className={css.nameMain}>User Name</p>
-          <p className={css.emailMain}>user@email.com</p>
+          <div className={css.avatarBig}>{initials}</div>
+          <p className={css.nameMain}>{fullName}</p>
+          <p className={css.emailMain}>{email || 'user@email.com'}</p>
           <label className={css.uploadBtn}>
             Завантажити нове фото
             <input type="file" accept="image/*" className={css.fileInput} />
@@ -30,22 +57,22 @@ export default function Profile() {
           <div className={css.row}>
             <div className={css.field}>
               <label>Імʼя</label>
-              <input value="User" disabled />
+              <input value={firstName} disabled />
             </div>
             <div className={css.field}>
               <label>Прізвище</label>
-              <input value="Name" disabled />
+              <input value={lastName} disabled />
             </div>
           </div>
 
           <div className={css.row}>
             <div className={css.field}>
               <label>Номер телефону</label>
-              <input value="+380..." disabled />
+              <input value={phone} disabled />
             </div>
             <div className={css.field}>
               <label>Електронна пошта</label>
-              <input value="user@email.com" disabled />
+              <input value={email} disabled />
             </div>
           </div>
 
@@ -56,8 +83,8 @@ export default function Profile() {
             <button type="button" className={css.primaryBtn}>
               Зберегти
             </button>
-            <button type="button" className={css.secondaryBtn}>
-              Змінити пароль
+            <button type="button" className={css.secondaryBtn} onClick={handleLogout}>
+              Вийти з акаунта
             </button>
           </div>
         </div>

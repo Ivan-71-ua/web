@@ -1,6 +1,21 @@
 # React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Backend integration quick start
+
+1. Запустіть бекенд (`clario-backend`) і переконайтесь, що він віддає API з JWT.
+2. Створіть файл `.env` в корені `clario` і додайте `VITE_API_URL=http://localhost:3001` (або інший домен).
+3. Фронтенд використовує інстанс `src/api/axios.js`, який автоматично додає `Authorization: Bearer <token>` з `localStorage` та вміє скидати сесію на 401/403.
+4. Всі HTTP-запити винесені в `src/services/*`:
+  - `auth.api.ts` — `login/register/fetchProfile`, повертає токен та дані користувача.
+  - `transactions.api.ts` — CRUD транзакцій, також форматує дати у `ДД.ММ.РРРР`.
+  - `goals.api.ts` — робота з цілями.
+  - `analytics.api.ts` — звіти доходів/витрат (параметри `startDate`, `endDate`).
+5. `AuthContext` тепер використовує бекендові ендпоїнти, зберігає токен та слухає подію `clario:unauthorized`, щоб автоматично виходити з акаунта.
+6. Для роботи з транзакціями в компонентах використовуйте хук `useTransactions`, який підтягує дані через нові сервіси.
+
+## Про шаблон
+
+Цей шаблон надає мінімальну конфігурацію для React + Vite з підтримкою HMR та базовими правилами ESLint.
 
 Currently, two official plugins are available:
 
