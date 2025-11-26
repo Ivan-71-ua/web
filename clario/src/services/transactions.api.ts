@@ -14,24 +14,16 @@ type TransactionDto = {
   created_at?: string
 }
 
-function formatDate(date: string) {
-  if (!date) return ''
-  if (date.includes('.')) return date
-  const parts = date.split('T')[0]?.split('-')
-  if (!parts || parts.length !== 3) return date
-  const [year, month, day] = parts
-  return `${day.padStart(2, '0')}.${month.padStart(2, '0')}.${year}`
-}
-
 function toTransaction(dto: TransactionDto): Transaction {
   const category = dto.type === 'income' ? 'Дохід' : dto.category || 'Інше'
+
   return {
     id: dto.id,
     userId: dto.user_id ?? dto.userId ?? 0,
     type: dto.type,
     category,
     amount: Number(dto.amount),
-    date: formatDate(dto.date),
+    date: dto.date,
     description: dto.description ?? undefined,
     goalId: dto.goal_id ?? null,
     createdAt: dto.created_at,
@@ -44,16 +36,16 @@ export async function getTransactions(): Promise<Transaction[]> {
 }
 
 export async function createTransaction(payload: CreateTransactionPayload): Promise<Transaction> {
-  const normalizedPayload = {
+  const body = {
     type: payload.type,
     amount: payload.amount,
+    category: payload.type === 'income' ? null : payload.category ?? null,
+    description: payload.description ?? null,
     date: payload.date,
-    description: payload.description,
-    category: payload.type === 'income' ? undefined : payload.category,
-    goalId: payload.goalId,
+    goal_id: payload.goalId ?? null,
   }
 
-  const { data } = await api.post<TransactionDto>('/transactions', normalizedPayload)
+  const { data } = await api.post<TransactionDto>('/transactions', body)
   return toTransaction(data)
 }
 
