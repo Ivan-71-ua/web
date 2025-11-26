@@ -5,7 +5,7 @@ import * as transactionsApi from '../../services/transactions.api'
 
 type AddTransactionPayload = {
   type: TransactionType
-  category: string
+  category?: string
   amount: number
   date: string
   description?: string
@@ -30,14 +30,16 @@ export function useTransactions(): UseTransactionsResult {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!user?.id) return
+    if (!user) return
 
     setLoading(true)
     setError(null)
 
     transactionsApi
-      .getTransactionsByUser(user.id)
+      .getTransactions()
       .then((data) => {
+            console.log('API transactions', data)
+
         setTransactions(data)
       })
       .catch(() => {
@@ -52,18 +54,17 @@ export function useTransactions(): UseTransactionsResult {
     const q = category.trim().toLowerCase()
     if (!q) return transactions
 
-    return transactions.filter((t) => t.category.toLowerCase().includes(q))
+    return transactions.filter((t) => (t.category ?? '').toLowerCase().includes(q))
   }, [transactions, category])
 
   async function addTransaction(payload: AddTransactionPayload): Promise<void> {
-    if (!user?.id) return
+    if (!user) return
 
     setLoading(true)
     setError(null)
 
     try {
       const created = await transactionsApi.createTransaction({
-        userId: user.id,
         type: payload.type,
         category: payload.category,
         amount: payload.amount,
@@ -81,7 +82,7 @@ export function useTransactions(): UseTransactionsResult {
   }
 
   async function deleteTransaction(id: Transaction['id']): Promise<void> {
-    if (!user?.id) return
+    if (!user) return
 
     setLoading(true)
     setError(null)

@@ -4,17 +4,19 @@ export type Transaction = {
   id: number
   userId: number
   type: TransactionType
-  category: string
+  category?: string | null
   amount: number
   date: string
   description?: string
+  goalId?: number | null
+  createdAt?: string
 }
 
 export type CreateTransactionPayload = {
-  userId: number
   type: TransactionType
-  category: string
+  category?: string
   amount: number
   date: string
   description?: string
+  goalId?: number
 }

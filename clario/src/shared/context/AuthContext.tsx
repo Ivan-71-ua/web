@@ -1,122 +1,134 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import type { AxiosError } from 'axios'
+import { clearToken, getTokenKey, getUnauthorizedEventName, persistToken } from '@/api/axios'
+import {
+  login as loginRequest,
+  register as registerRequest,
+  fetchProfile,
+} from '@/services/auth.api'
+import type { AuthUser, RegisterPayload } from '@/services/auth.api'
 /*eslint-disable react-refresh/only-export-components*/
 
-const API_URL = 'http://localhost:3001'
-
-export interface User {
-  id: number
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-  phone: string
-}
-
-export interface RegisterPayload {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-  phone: string
-}
+const USER_STORAGE_KEY = 'clario_user'
 
 interface AuthContextValue {
-  user: User | null
+  user: AuthUser | null
   isAuthenticated: boolean
   loading: boolean
   error: string | null
-  register: (payload: RegisterPayload) => Promise<User>
-  login: (email: string, password: string) => Promise<User>
+  register: (payload: RegisterPayload) => Promise<AuthUser>
+  login: (email: string, password: string) => Promise<AuthUser>
   logout: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const persistUser = useCallback((next: AuthUser | null) => {
+    if (typeof window === 'undefined') return
+    if (!next) {
+      window.localStorage.removeItem(USER_STORAGE_KEY)
+      return
+    }
+    window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(next))
+  }, [])
+
+  const logout = useCallback(() => {
+    setUser(null)
+    setError(null)
+    persistUser(null)
+    clearToken()
+  }, [persistUser])
+
   useEffect(() => {
-    const stored = localStorage.getItem('clario_user')
+    if (typeof window === 'undefined') return
+    const stored = window.localStorage.getItem(USER_STORAGE_KEY)
     if (stored) {
       try {
-        const parsed: User = JSON.parse(stored)
+        const parsed: AuthUser = JSON.parse(stored)
         setUser(parsed)
       } catch {
-        localStorage.removeItem('clario_user')
+        window.localStorage.removeItem(USER_STORAGE_KEY)
       }
     }
-  }, [])
+
+    const token = window.localStorage.getItem(getTokenKey())
+    if (!token) {
+      return
+    }
+
+    fetchProfile()
+      .then((profile) => {
+        setUser(profile)
+        persistUser(profile)
+      })
+      .catch(() => {
+        logout()
+      })
+  }, [logout, persistUser])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const eventName = getUnauthorizedEventName()
+    function handleUnauthorized() {
+      logout()
+    }
+    window.addEventListener(eventName, handleUnauthorized)
+    return () => {
+      window.removeEventListener(eventName, handleUnauthorized)
+    }
+  }, [logout])
 
   const isAuthenticated = !!user
 
-  async function register(payload: RegisterPayload): Promise<User> {
+  function extractErrorMessage(err: unknown): string {
+    if (typeof err === 'string') return err
+    if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
+      return err.message
+    }
+    const axiosErr = err as AxiosError<{ message?: string }>
+    return axiosErr.response?.data?.message ?? 'Сталася помилка'
+  }
+
+  async function register(payload: RegisterPayload): Promise<AuthUser> {
     setLoading(true)
     setError(null)
     try {
-      const email = payload.email
-      const resCheck = await fetch(`${API_URL}/users?email=${encodeURIComponent(email)}`)
-      if (!resCheck.ok) {
-        throw new Error('Помилка під час реєстрації')
-      }
-      const existing: User[] = await resCheck.json()
-      if (existing.length > 0) {
-        throw new Error('Користувач з таким email вже існує')
-      }
-
-      const res = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) {
-        throw new Error('Помилка під час реєстрації')
-      }
-      const newUser: User = await res.json()
-      setUser(newUser)
-      localStorage.setItem('clario_user', JSON.stringify(newUser))
-      return newUser
+      const { user: nextUser, token } = await registerRequest(payload)
+      persistToken(token)
+      setUser(nextUser)
+      persistUser(nextUser)
+      return nextUser
     } catch (e) {
-      const err = e as Error
-      setError(err.message || 'Сталася помилка')
+      const message = extractErrorMessage(e)
+      setError(message)
       throw e
     } finally {
       setLoading(false)
     }
   }
 
-  async function login(email: string, password: string): Promise<User> {
+  async function login(email: string, password: string): Promise<AuthUser> {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(
-        `${API_URL}/users?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
-      )
-      if (!res.ok) {
-        throw new Error('Помилка під час входу')
-      }
-      const data: User[] = await res.json()
-      if (data.length === 0) {
-        throw new Error('Невірний email або пароль')
-      }
-      const loggedInUser = data[0]
-      setUser(loggedInUser)
-      localStorage.setItem('clario_user', JSON.stringify(loggedInUser))
-      return loggedInUser
+      const { user: nextUser, token } = await loginRequest({ email, password })
+      persistToken(token)
+      setUser(nextUser)
+      persistUser(nextUser)
+      return nextUser
     } catch (e) {
-      const err = e as Error
-      setError(err.message || 'Сталася помилка')
+      const message = extractErrorMessage(e)
+      setError(message)
       throw e
     } finally {
       setLoading(false)
     }
-  }
-
-  function logout() {
-    setUser(null)
-    localStorage.removeItem('clario_user')
   }
 
   const value: AuthContextValue = {

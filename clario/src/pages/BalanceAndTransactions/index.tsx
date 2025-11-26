@@ -14,21 +14,42 @@ type Category = ExpenseCategory | 'Дохід'
 const DONUT_COLORS = ['#2563eb', '#22c55e', '#14b8a6', '#a855f7', '#f97316', '#d4d4d8']
 const ITEMS_PER_PAGE = 10
 
-function parseDate(value: string): Date | null {
-  const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
-  if (!match) return null
+function parseTransactionDate(value: string): Date | null {
+  if (!value) return null
+  const trimmed = value.trim()
 
-  const day = Number(match[1])
-  const month = Number(match[2])
-  const year = Number(match[3])
-
-  const d = new Date(year, month - 1, day)
-
-  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
-    return null
+  const dotMatch = trimmed.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
+  if (dotMatch) {
+    const day = Number(dotMatch[1])
+    const month = Number(dotMatch[2])
+    const year = Number(dotMatch[3])
+    const d = new Date(year, month - 1, day)
+    d.setHours(0, 0, 0, 0)
+    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {
+      return d
+    }
   }
 
-  return d
+  const isoPart = (trimmed.split('T')[0] ?? trimmed).trim()
+  const isoMatch = isoPart.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (isoMatch) {
+    const year = Number(isoMatch[1])
+    const month = Number(isoMatch[2])
+    const day = Number(isoMatch[3])
+    const d = new Date(year, month - 1, day)
+    d.setHours(0, 0, 0, 0)
+    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {
+      return d
+    }
+  }
+
+  const parsed = new Date(trimmed)
+  if (!Number.isNaN(parsed.getTime())) {
+    parsed.setHours(0, 0, 0, 0)
+    return parsed
+  }
+
+  return null
 }
 
 export default function BalanceAndTransactions() {
@@ -61,11 +82,8 @@ export default function BalanceAndTransactions() {
     let expense = 0
 
     for (const t of transactions) {
-      if (t.type === 'income') {
-        income += t.amount
-      } else {
-        expense += t.amount
-      }
+      if (t.type === 'income') income += t.amount
+      else expense += t.amount
     }
 
     return {
@@ -91,15 +109,12 @@ export default function BalanceAndTransactions() {
       let expense = 0
 
       for (const t of transactions) {
-        const tDate = parseDate(t.date)
+        const tDate = parseTransactionDate(t.date)
         if (!tDate) continue
 
         if (tDate >= dayStart && tDate < dayEnd) {
-          if (t.type === 'income') {
-            income += t.amount
-          } else {
-            expense += t.amount
-          }
+          if (t.type === 'income') income += t.amount
+          else expense += t.amount
         }
       }
 
@@ -128,7 +143,6 @@ export default function BalanceAndTransactions() {
       if (t.type !== 'expense') continue
 
       let cat = t.category as ExpenseCategory
-
       if (!EXPENSE_CATEGORIES.includes(cat)) {
         cat = 'Інше'
       }
@@ -171,10 +185,9 @@ export default function BalanceAndTransactions() {
     const dayNet = new Map<number, number>()
 
     for (const t of transactions) {
-      const d = parseDate(t.date)
+      const d = parseTransactionDate(t.date)
       if (!d) continue
       d.setHours(0, 0, 0, 0)
-
       if (d > today) continue
 
       const key = d.getTime()
@@ -232,7 +245,7 @@ export default function BalanceAndTransactions() {
       return
     }
 
-    const parsed = parseDate(date)
+    const parsed = parseTransactionDate(date)
     if (!parsed) {
       setFormError('Дата має бути у форматі ДД.ММ.РРРР, наприклад 10.11.2025')
       return
@@ -285,11 +298,9 @@ export default function BalanceAndTransactions() {
     const copy = [...filteredTransactions]
 
     copy.sort((a, b) => {
-      const da = parseDate(a.date)
-      const db = parseDate(b.date)
-      if (da && db) {
-        return db.getTime() - da.getTime()
-      }
+      const da = parseTransactionDate(a.date)
+      const db = parseTransactionDate(b.date)
+      if (da && db) return db.getTime() - da.getTime()
       if (da && !db) return -1
       if (!da && db) return 1
       return 0
@@ -558,25 +569,36 @@ export default function BalanceAndTransactions() {
             </div>
           )}
 
-          {pageTransactions.map((t: Transaction) => (
-            <div
-              className={css.tableRow}
-              key={t.id}
-              style={isDeleteMode && deleteId === t.id ? { backgroundColor: '#fff0f0' } : undefined}
-              onClick={() => {
-                if (isDeleteMode) {
-                  setDeleteId(t.id)
-                }
-              }}
-            >
-              <span>{t.date}</span>
-              <span>{t.category}</span>
-              <span className={t.type === 'income' ? css.plus : css.minus}>
-                {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
-              </span>
-              <span className={css.descCell}>{t.description || ''}</span>
-            </div>
-          ))}
+          {pageTransactions.map((t: Transaction) => {
+            const d = parseTransactionDate(t.date)
+            const displayDate = d
+              ? d.toLocaleDateString('uk-UA', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                })
+              : t.date
+
+            return (
+              <div
+                className={css.tableRow}
+                key={t.id}
+                style={isDeleteMode && deleteId === t.id ? { backgroundColor: '#fff0f0' } : undefined}
+                onClick={() => {
+                  if (isDeleteMode) {
+                    setDeleteId(t.id)
+                  }
+                }}
+              >
+                <span>{displayDate}</span>
+                <span>{t.category}</span>
+                <span className={t.type === 'income' ? css.plus : css.minus}>
+                  {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
+                </span>
+                <span className={css.descCell}>{t.description || ''}</span>
+              </div>
+            )
+          })}
 
           <div className={css.tableFooter}>
             <Link to="/dashboard" className={css.primaryBtn}>

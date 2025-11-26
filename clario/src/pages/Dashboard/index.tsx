@@ -24,14 +24,42 @@ type Achievement = {
 const GOALS_STORAGE_KEY = 'clario_goals'
 
 function parseDate(value: string): Date | null {
-  const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
-  if (!match) return null
-  const day = Number(match[1])
-  const month = Number(match[2])
-  const year = Number(match[3])
-  const d = new Date(year, month - 1, day)
-  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null
-  return d
+  if (!value) return null
+  const trimmed = value.trim()
+
+  const dotMatch = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(trimmed)
+  if (dotMatch) {
+    const day = Number(dotMatch[1])
+    const month = Number(dotMatch[2])
+    const year = Number(dotMatch[3])
+    const d = new Date(year, month - 1, day)
+    if (Number.isNaN(d.getTime())) return null
+    d.setHours(0, 0, 0, 0)
+    return d
+  }
+
+  let isoCandidate = trimmed
+  if (isoCandidate.length >= 10) {
+    isoCandidate = isoCandidate.slice(0, 10)
+  }
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoCandidate)
+  if (isoMatch) {
+    const year = Number(isoMatch[1])
+    const month = Number(isoMatch[2])
+    const day = Number(isoMatch[3])
+    const d = new Date(year, month - 1, day)
+    if (Number.isNaN(d.getTime())) return null
+    d.setHours(0, 0, 0, 0)
+    return d
+  }
+
+  const parsed = new Date(trimmed)
+  if (!Number.isNaN(parsed.getTime())) {
+    parsed.setHours(0, 0, 0, 0)
+    return parsed
+  }
+
+  return null
 }
 
 function loadGoalsFromStorage(): StoredGoal[] {
@@ -86,22 +114,29 @@ export default function Dashboard() {
   const { balance, weekIncome, weekExpense, latestTransactions } = useMemo(() => {
     let incomeAll = 0
     let expenseAll = 0
+
     const now = new Date()
     now.setHours(0, 0, 0, 0)
     const weekStart = new Date(now)
     weekStart.setDate(now.getDate() - 6)
+    weekStart.setHours(0, 0, 0, 0)
+
     let weekIncomeSum = 0
     let weekExpenseSum = 0
+
     const copy: Transaction[] = [...transactions]
+
     for (const t of transactions) {
       if (t.type === 'income') incomeAll += t.amount
       else expenseAll += t.amount
+
       const d = parseDate(t.date)
       if (d && d >= weekStart && d <= now) {
         if (t.type === 'income') weekIncomeSum += t.amount
         else weekExpenseSum += t.amount
       }
     }
+
     copy.sort((a, b) => {
       const da = parseDate(a.date)
       const db = parseDate(b.date)
@@ -110,11 +145,11 @@ export default function Dashboard() {
       if (!da && db) return 1
       return 0
     })
+
     const latest = copy.slice(0, 5)
+
     return {
       balance: incomeAll - expenseAll,
-      totalIncome: incomeAll,
-      totalExpense: expenseAll,
       weekIncome: weekIncomeSum,
       weekExpense: weekExpenseSum,
       latestTransactions: latest,

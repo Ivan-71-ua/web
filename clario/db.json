@@ -15,6 +15,14 @@
       "email": "bb@gmail.com",
       "password": "parol1",
       "id": 2
+    },
+    {
+      "firstName": "Bodya",
+      "lastName": "Pavuk",
+      "phone": "+380666666666",
+      "email": "bodya.pavuk@gmail.com",
+      "password": "parol1",
+      "id": 3
     }
   ],
   "transactions": [
