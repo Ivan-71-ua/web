@@ -7,11 +7,9 @@ import Assistant from '../pages/Assistant'
 import Dashboard from '../pages/Dashboard'
 import Profile from '../pages/Profile'
 import BalanceAndTransactions from '../pages/BalanceAndTransactions'
+import NotFound from '../pages/NotFound'
 import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
-import NotFound from '../pages/NotFound'
-
-const isAuth = false
 
 export default function AppRoutes() {
   return (
@@ -19,23 +17,41 @@ export default function AppRoutes() {
       <Route
         path="/"
         element={
-          <PublicRoute isAuth={isAuth}>
+          <PublicRoute>
             <Landing />
           </PublicRoute>
         }
       />
+
       <Route
         path="/auth"
         element={
-          <PublicRoute isAuth={isAuth}>
+          <PublicRoute>
             <Register />
           </PublicRoute>
         }
       />
       <Route
+        path="/auth/register"
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
+
+      <Route
         path="/login"
         element={
-          <PublicRoute isAuth={isAuth}>
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/login"
+        element={
+          <PublicRoute>
             <Login />
           </PublicRoute>
         }
@@ -44,7 +60,7 @@ export default function AppRoutes() {
       <Route
         path="/assistant"
         element={
-          <ProtectedRoute isAuth={isAuth}>
+          <ProtectedRoute>
             <Assistant />
           </ProtectedRoute>
         }
@@ -52,7 +68,7 @@ export default function AppRoutes() {
       <Route
         path="/goals"
         element={
-          <ProtectedRoute isAuth={isAuth}>
+          <ProtectedRoute>
             <Goals />
           </ProtectedRoute>
         }
@@ -60,7 +76,7 @@ export default function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute isAuth={isAuth}>
+          <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         }
@@ -68,7 +84,7 @@ export default function AppRoutes() {
       <Route
         path="/balance"
         element={
-          <ProtectedRoute isAuth={isAuth}>
+          <ProtectedRoute>
             <BalanceAndTransactions />
           </ProtectedRoute>
         }
@@ -76,7 +92,7 @@ export default function AppRoutes() {
       <Route
         path="/profile"
         element={
-          <ProtectedRoute isAuth={isAuth}>
+          <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
         }
