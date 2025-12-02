@@ -1,43 +1,15 @@
 ﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import css from './Goals.module.css'
+import { listGoals, createGoal, updateGoal, deleteGoal } from '@/services/goals.api'
+import type { Goal } from '@/shared/types/goals'
 
 type GoalColor = 'red' | 'green' | 'purple' | 'blue' | 'orange'
-
-type Goal = {
-  id: number
-  name: string
-  currentAmount: number
-  targetAmount: number
-  color: GoalColor
-}
-
-const STORAGE_KEY = 'clario_goals'
-
-function loadGoalsFromStorage(): Goal[] {
-  if (typeof window === 'undefined') return []
-
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw) as Goal[]
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (g) =>
-        typeof g.id === 'number' &&
-        typeof g.name === 'string' &&
-        typeof g.currentAmount === 'number' &&
-        typeof g.targetAmount === 'number',
-    )
-  } catch {
-    return []
-  }
-}
 
 export default function Goals() {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add')
-  const [goals, setGoals] = useState<Goal[]>(() => loadGoalsFromStorage())
+  const [goals, setGoals] = useState<Goal[]>([])
   const [error, setError] = useState<string | null>(null)
   const [addName, setAddName] = useState('')
   const [addCurrent, setAddCurrent] = useState('')
@@ -50,12 +22,28 @@ export default function Goals() {
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(goals))
-    } catch {
-      //
+    let cancelled = false
+
+    async function fetchGoals() {
+      setError(null)
+      try {
+        const data = await listGoals()
+        if (!cancelled) {
+          setGoals(data)
+        }
+      } catch {
+        if (!cancelled) {
+          setError('Не вдалося завантажити цілі')
+        }
+      }
     }
-  }, [goals])
+
+    fetchGoals()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     setError(null)
@@ -82,7 +70,7 @@ export default function Goals() {
     }
   }, [mode, goals])
 
-  function handleAddGoal() {
+  async function handleAddGoal() {
     setError(null)
 
     const name = addName.trim()
@@ -101,19 +89,22 @@ export default function Goals() {
 
     const safeCurrent = Number.isFinite(current) && current >= 0 ? current : 0
 
-    const newGoal: Goal = {
-      id: Date.now(),
-      name,
-      currentAmount: Math.min(safeCurrent, target),
-      targetAmount: target,
-      color: addColor,
-    }
+    try {
+      const created = await createGoal({
+        name,
+        targetAmount: target,
+        currentAmount: Math.min(safeCurrent, target),
+        color: addColor,
+      })
 
-    setGoals((prev) => [...prev, newGoal])
-    setAddName('')
-    setAddCurrent('')
-    setAddTarget('')
-    setAddColor('red')
+      setGoals((prev) => [...prev, created])
+      setAddName('')
+      setAddCurrent('')
+      setAddTarget('')
+      setAddColor('red')
+    } catch {
+      setError('Не вдалося створити ціль')
+    }
   }
 
   function handleSelectEdit(id: number) {
@@ -124,7 +115,7 @@ export default function Goals() {
     setEditIncrease('')
   }
 
-  function handleUpdateGoal() {
+  async function handleUpdateGoal() {
     setError(null)
     if (editId == null) return
 
@@ -146,33 +137,42 @@ export default function Goals() {
       return
     }
 
-    setGoals((prev) =>
-      prev.map((g) => {
-        if (g.id !== editId) return g
-        const updated: Goal = { ...g }
-        updated.name = nextName
-        updated.targetAmount = targetNum
+    let nextCurrent = goal.currentAmount
 
-        if (incNum > 0) {
-          updated.currentAmount += incNum
-        }
-        if (updated.currentAmount > updated.targetAmount) {
-          updated.currentAmount = updated.targetAmount
-        }
+    if (incNum > 0) {
+      nextCurrent += incNum
+    }
 
-        return updated
-      }),
-    )
+    if (nextCurrent > targetNum) {
+      nextCurrent = targetNum
+    }
 
-    setEditName('')
-    setEditTarget('')
-    setEditIncrease('')
+    try {
+      const updated = await updateGoal(editId, {
+        name: nextName,
+        targetAmount: targetNum,
+        currentAmount: nextCurrent,
+      })
+
+      setGoals((prev) => prev.map((g) => (g.id === editId ? updated : g)))
+      setEditName('')
+      setEditTarget('')
+      setEditIncrease('')
+    } catch {
+      setError('Не вдалося оновити ціль')
+    }
   }
 
-  function handleDeleteGoal() {
+  async function handleDeleteGoal() {
     setError(null)
     if (deleteId == null) return
-    setGoals((prev) => prev.filter((g) => g.id !== deleteId))
+
+    try {
+      await deleteGoal(deleteId)
+      setGoals((prev) => prev.filter((g) => g.id !== deleteId))
+    } catch {
+      setError('Не вдалося видалити ціль')
+    }
   }
 
   const achievements: { id: number; title: string; text: string }[] = []
@@ -228,7 +228,7 @@ export default function Goals() {
 
           const left = Math.max(goal.targetAmount - goal.currentAmount, 0)
 
-          const color = goal.color ?? 'red'
+          const color = (goal.color as GoalColor) || 'red'
 
           let dotColorClass = css.red
           let barClass = css.barRed

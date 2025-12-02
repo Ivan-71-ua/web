@@ -351,7 +351,7 @@ export default function BalanceAndTransactions() {
           </div>
           <div className={css.lineChartBox}>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={balanceSeries} margin={{ top: 10, right: 24, left: 24, bottom: 24 }}>
+              <LineChart data={balanceSeries} margin={{ top: 0, right: 24, left: 24, bottom: 24 }}>
                 <XAxis
                   dataKey="label"
                   tickLine={false}
@@ -583,7 +583,9 @@ export default function BalanceAndTransactions() {
               <div
                 className={css.tableRow}
                 key={t.id}
-                style={isDeleteMode && deleteId === t.id ? { backgroundColor: '#fff0f0' } : undefined}
+                style={
+                  isDeleteMode && deleteId === t.id ? { backgroundColor: '#fff0f0' } : undefined
+                }
                 onClick={() => {
                   if (isDeleteMode) {
                     setDeleteId(t.id)

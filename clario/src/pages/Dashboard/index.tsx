@@ -1,27 +1,19 @@
-﻿import { useMemo } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../shared/context/AuthContext'
 import { useTransactions } from '../../shared/hooks/useTransactions'
 import type { Transaction } from '../../shared/types/transactions'
+import { listGoals } from '@/services/goals.api'
+import type { Goal } from '@/shared/types/goals'
 import css from './Dashboard.module.css'
 
-type GoalColor = 'red' | 'green' | 'blue' | 'yellow' | 'purple'
-
-type StoredGoal = {
-  id: number
-  name: string
-  currentAmount: number
-  targetAmount: number
-  color: GoalColor
-}
+type GoalColor = 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'orange'
 
 type Achievement = {
   id: number
   title: string
   text: string
 }
-
-const GOALS_STORAGE_KEY = 'clario_goals'
 
 function parseDate(value: string): Date | null {
   if (!value) return null
@@ -62,24 +54,6 @@ function parseDate(value: string): Date | null {
   return null
 }
 
-function loadGoalsFromStorage(): StoredGoal[] {
-  try {
-    const raw = localStorage.getItem(GOALS_STORAGE_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw) as StoredGoal[]
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (g) =>
-        typeof g.id === 'number' &&
-        typeof g.name === 'string' &&
-        typeof g.currentAmount === 'number' &&
-        typeof g.targetAmount === 'number',
-    )
-  } catch {
-    return []
-  }
-}
-
 function getGoalClasses(color: GoalColor) {
   switch (color) {
     case 'red':
@@ -89,6 +63,7 @@ function getGoalClasses(color: GoalColor) {
     case 'blue':
       return { dot: css.badgeBlue, bar: css.barBlue }
     case 'yellow':
+    case 'orange':
       return { dot: css.badgeYellow, bar: css.barYellow }
     case 'purple':
       return { dot: css.badgePurple, bar: css.barPurple }
@@ -100,6 +75,33 @@ function getGoalClasses(color: GoalColor) {
 export default function Dashboard() {
   const { user } = useAuth()
   const { transactions, loading } = useTransactions()
+
+  const [goals, setGoals] = useState<Goal[]>([])
+  const [goalsError, setGoalsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchGoals() {
+      setGoalsError(null)
+      try {
+        const data = await listGoals()
+        if (!cancelled) {
+          setGoals(data.filter((g) => !g.isHidden))
+        }
+      } catch {
+        if (!cancelled) {
+          setGoalsError('Не вдалося завантажити цілі')
+        }
+      }
+    }
+
+    fetchGoals()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const greetingName = useMemo(() => {
     if (!user) return 'User'
@@ -156,7 +158,6 @@ export default function Dashboard() {
     }
   }, [transactions])
 
-  const goals = useMemo(() => loadGoalsFromStorage(), [])
   const activeGoals = useMemo(
     () => goals.filter((g) => g.targetAmount > 0 && g.currentAmount < g.targetAmount),
     [goals],
@@ -263,28 +264,30 @@ export default function Dashboard() {
 
         <div className={css.card}>
           <div className={css.cardTitleCenter}>Прогрес цілей</div>
-          {goalsPreview.length === 0 && (
+          {goalsError && <p className={css.emptyText}>{goalsError}</p>}
+          {!goalsError && goalsPreview.length === 0 && (
             <p className={css.emptyText}>
               Ще немає активних цілей — додай першу на сторінці цілей.
             </p>
           )}
-          {goalsPreview.map((goal) => {
-            const pct =
-              goal.targetAmount > 0
-                ? Math.min(100, (goal.currentAmount / goal.targetAmount) * 100)
-                : 0
-            const classes = getGoalClasses(goal.color)
-            return (
-              <div key={goal.id} className={css.goalRow}>
-                <span className={classes.dot} />
-                <span className={css.goalName}>{goal.name}</span>
-                <div className={css.barWrapSm}>
-                  <div className={classes.bar} style={{ width: `${pct}%` }} />
+          {!goalsError &&
+            goalsPreview.map((goal) => {
+              const pct =
+                goal.targetAmount > 0
+                  ? Math.min(100, (goal.currentAmount / goal.targetAmount) * 100)
+                  : 0
+              const classes = getGoalClasses((goal.color as GoalColor) || 'green')
+              return (
+                <div key={goal.id} className={css.goalRow}>
+                  <span className={classes.dot} />
+                  <span className={css.goalName}>{goal.name}</span>
+                  <div className={css.barWrapSm}>
+                    <div className={classes.bar} style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className={css.pct}>{Math.round(pct)}%</span>
                 </div>
-                <span className={css.pct}>{Math.round(pct)}%</span>
-              </div>
-            )
-          })}
+              )
+            })}
           <Link className={css.btn} to="/goals">
             Перейти
           </Link>
