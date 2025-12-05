@@ -9,6 +9,7 @@
     }
   ],
   "compilerOptions": {
+    "types": ["vite/client", "cypress"],
     "paths": {
       "@/*": ["src/*"]
     },
