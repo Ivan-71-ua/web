@@ -12,7 +12,11 @@
     "format": "prettier --write .",
     "prepare": "husky",
     "format:check": "prettier --check .",
-    "server": "json-server db.json --port 3001"
+    "server": "json-server db.json --port 3001",
+    "test:component": "cypress run --component",
+"test:component:open": "cypress open --component",
+"coverage": "nyc report --reporter=text-summary --reporter=html"
+
   },
   "dependencies": {
     "axios": "^1.13.2",
@@ -23,25 +27,46 @@
     "react-router-dom": "^7.9.4",
     "recharts": "^3.4.1"
   },
+  "nyc": {
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "all": true,
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "**/*.cy.ts",
+    "**/*.cy.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "src/main.tsx"
+  ]
+},
+
+
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
+    "@cypress/code-coverage": "^3.14.7",
     "@eslint/js": "^9.38.0",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
-    "cypress": "^15.5.0",
+    "cypress": "^15.7.1",
     "eslint": "^9.38.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.5",
+    "nyc": "^17.1.0",
     "prettier": "^3.6.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^7.1.7",
+    "vite-plugin-istanbul": "^7.2.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "lint-staged": {
